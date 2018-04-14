@@ -65,7 +65,7 @@ private:
 	Status calculateStatus(void) const;
 };
 
-inline void Game::run(void)
+void Game::run(void)
 {
 	Pokitto::Core::begin();
 
@@ -79,7 +79,7 @@ inline void Game::run(void)
 	}
 }
 
-inline std::pair<bool, Game::Cell> Game::getWinner(void) const
+std::pair<bool, Game::Cell> Game::getWinner(void) const
 {
 	static const PointType winningSets[][3] =
 	{
@@ -125,7 +125,7 @@ inline std::pair<bool, Game::Cell> Game::getWinner(void) const
 	return std::make_pair(false, Cell::None);
 }
 
-inline bool Game::hasAnyEmptyCells(void) const
+bool Game::hasAnyEmptyCells(void) const
 {
 	for(int y = 0; y < 3; ++y)
 	{
@@ -141,7 +141,7 @@ inline bool Game::hasAnyEmptyCells(void) const
 	return false;
 }
 
-inline Game::Status Game::calculateStatus(void) const
+Game::Status Game::calculateStatus(void) const
 {
 	const auto winner = getWinner();
 	const bool success = winner.first;
@@ -170,7 +170,7 @@ inline Game::Status Game::calculateStatus(void) const
 	}
 }
 
-inline void Game::update(void)
+void Game::update(void)
 {
 	if(Pokitto::Buttons::held(BTN_LEFT, 1))
 	{
@@ -223,7 +223,7 @@ inline void Game::update(void)
 	}
 }
 
-inline void Game::draw(void)
+void Game::draw(void)
 {
 	// Drawing parameters for easy modification
 	const int xGap = 8;
@@ -345,7 +345,7 @@ inline void Game::draw(void)
 }
 
 // Old version
-/*inline void Game::draw(void)
+/*void Game::draw(void)
 {
 	// Drawing parameters for easy modification
 	const int xOffset = 16;

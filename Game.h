@@ -63,6 +63,9 @@ private:
 	std::pair<bool, Cell> getWinner(void) const;
 	bool hasAnyEmptyCells(void) const;
 	Status calculateStatus(void) const;
+
+	void drawGrid(void);
+	void drawStatus(void);
 };
 
 void Game::run(void)
@@ -225,6 +228,12 @@ void Game::update(void)
 
 void Game::draw(void)
 {
+	drawGrid();
+	drawStatus();
+}
+
+void Game::drawGrid(void)
+{
 	// Drawing parameters for easy modification
 	const int xGap = 8;
 	const int yGap = 8;
@@ -300,7 +309,10 @@ void Game::draw(void)
 			}
 		}
 	}
+}
 
+void Game::drawStatus(void)
+{
 	Pokitto::Display::setCursor(16, 8);
 	switch(this->status)
 	{

@@ -29,6 +29,11 @@ public:
 	constexpr static const std::uint8_t Height = HeightValue;
 	constexpr static const std::uint16_t Count = Width * Height;
 
+	constexpr static const std::uint8_t FirstX = 0;
+	constexpr static const std::uint8_t FirstY = 0;
+	constexpr static const std::uint8_t LastX = Width - 1;
+	constexpr static const std::uint8_t LastY = Height - 1;
+
 private:
 	ValueType items[Count];
 

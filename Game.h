@@ -20,6 +20,8 @@
 #include <Pokitto.h>
 
 #include <algorithm>
+#include <utility>
+#include <cstddef>
 
 #include "Grid.h"
 #include "Point.h"
@@ -27,6 +29,13 @@
 class Game
 {
 public:
+	enum class Cell : unsigned char
+	{
+		None,
+		Nought,
+		Cross,
+	};
+
 	enum class Status : unsigned char
 	{
 		Unfinished,
@@ -35,16 +44,9 @@ public:
 		Draw,
 	};
 
-	enum class Cell : unsigned char
-	{
-		None,
-		Nought,
-		Cross,
-	};
-
 public:
 	using CellGrid = Grid<Cell, 3, 3>;
-	using PointType = Point<int>;
+	using PointType = Point<unsigned int>;
 
 private:
 	CellGrid grid;
@@ -59,10 +61,15 @@ private:
 	void update(void);
 	void draw(void);
 
+	std::pair<bool, Cell> getWinner(void) const;
+	bool hasAnyEmptyCells(void) const;
 	Status calculateStatus(void) const;
+
+	void drawGrid(void);
+	void drawStatus(void);
 };
 
-inline void Game::run(void)
+void Game::run(void)
 {
 	Pokitto::Core::begin();
 
@@ -76,96 +83,29 @@ inline void Game::run(void)
 	}
 }
 
-inline Game::Status Game::calculateStatus(void) const
-{
-	PointType const winningSets[][3] =
-	{
-		// Vertical
-		{ PointType(0, 0), PointType(0, 1), PointType(0, 2) },
-		{ PointType(1, 0), PointType(1, 1), PointType(1, 2) },
-		{ PointType(2, 0), PointType(2, 1), PointType(2, 2) },
-
-		// Horizontal
-		{ PointType(0, 0), PointType(1, 0), PointType(2, 0) },
-		{ PointType(0, 1), PointType(1, 1), PointType(2, 1) },
-		{ PointType(0, 2), PointType(1, 2), PointType(2, 2) },
-
-		// Diagonal
-		{ PointType(0, 0), PointType(1, 1), PointType(2, 2) },
-		{ PointType(2, 0), PointType(1, 1), PointType(0, 2) },
-	};
-
-	for(auto const & line : winningSets)
-	{
-		PointType start = line[0];
-		Cell type = this->grid.getItem(start.x, start.y);
-
-		if(type == Cell::None)
-			continue;
-
-		bool success = true;
-		for(int i = 0; i < 3; ++i)
-		{
-			if(this->grid.getItem(line[i].x, line[i].y) != type)
-			{
-				success = false;
-				break;
-			}
-		}
-
-		if(success)
-		{
-			switch(type)
-			{
-				case Cell::Nought:
-					return Status::NoughtsWins;
-				case Cell::Cross:
-					return Status::CrossesWins;
-				default:
-					return Status::Unfinished;
-			}
-		}
-	}
-
-	bool hasEmptySpace = false;
-	for(int y = 0; y < 3 && !hasEmptySpace; ++y)
-	{
-		for(int x = 0; x < 3; ++x)
-		{
-			if(this->grid.getItem(x, y) == Cell::None)
-			{
-				hasEmptySpace = true;
-				break;
-			}
-		}
-	}
-
-	return hasEmptySpace ? Status::Unfinished : Status::Draw;
-}
-
-inline void Game::update(void)
+void Game::update(void)
 {
 	if(Pokitto::Buttons::held(BTN_LEFT, 1))
 	{
-		if(this->selector.x > 0)
+		if(this->selector.x > CellGrid::FirstX)
 			--this->selector.x;
 	}
 
 	if(Pokitto::Buttons::held(BTN_RIGHT, 1))
 	{
-		if(this->selector.x < 2)
+		if(this->selector.x < CellGrid::LastX)
 			++this->selector.x;
 	}
 
 	if(Pokitto::Buttons::held(BTN_UP, 1))
 	{
-		if(this->selector.y > 0)
+		if(this->selector.y > CellGrid::FirstY)
 			--this->selector.y;
 	}
 
 	if(Pokitto::Buttons::held(BTN_DOWN, 1))
 	{
-		if(this->selector.y < 2)
+		if(this->selector.y < CellGrid::LastY)
 			++this->selector.y;
 	}
 
@@ -196,7 +136,104 @@ inline void Game::update(void)
 	}
 }
 
-inline void Game::draw(void)
+void Game::draw(void)
+{
+	drawGrid();
+	drawStatus();
+}
+
+std::pair<bool, Game::Cell> Game::getWinner(void) const
+{
+	static const PointType winningSets[][3] =
+	{
+		// Vertical
+		{ PointType(0, 0), PointType(0, 1), PointType(0, 2) },
+		{ PointType(1, 0), PointType(1, 1), PointType(1, 2) },
+		{ PointType(2, 0), PointType(2, 1), PointType(2, 2) },
+
+		// Horizontal
+		{ PointType(0, 0), PointType(1, 0), PointType(2, 0) },
+		{ PointType(0, 1), PointType(1, 1), PointType(2, 1) },
+		{ PointType(0, 2), PointType(1, 2), PointType(2, 2) },
+
+		// Diagonal
+		{ PointType(0, 0), PointType(1, 1), PointType(2, 2) },
+		{ PointType(2, 0), PointType(1, 1), PointType(0, 2) },
+	};
+
+	for(auto const & line : winningSets)
+	{
+		const PointType start = line[0];
+		const Cell type = this->grid.getItem(start.x, start.y);
+
+		if(type == Cell::None)
+			continue;
+
+		bool success = true;
+		for(std::size_t i = 0; i < 3; ++i)
+		{
+			if(this->grid.getItem(line[i].x, line[i].y) != type)
+			{
+				success = false;
+				break;
+			}
+		}
+
+		if(success)
+		{
+			return std::make_pair(true, type);
+		}
+	}
+
+	return std::make_pair(false, Cell::None);
+}
+
+bool Game::hasAnyEmptyCells(void) const
+{
+	for(std::size_t y = 0; y < CellGrid::Height; ++y)
+	{
+		for(std::size_t x = 0; x < CellGrid::Width; ++x)
+		{
+			if(this->grid.getItem(x, y) == Cell::None)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+Game::Status Game::calculateStatus(void) const
+{
+	const auto winner = getWinner();
+	const bool success = winner.first;
+
+	if(success)
+	{
+		const Cell type = winner.second;
+		switch(type)
+		{
+			case Cell::Nought:
+				return Status::NoughtsWins;
+			case Cell::Cross:
+				return Status::CrossesWins;
+			default:
+				return Status::Unfinished;
+		}
+	}
+
+	if(this->hasAnyEmptyCells())
+	{
+		return Status::Unfinished;
+	}
+	else
+	{
+		return Status::Draw;
+	}
+}
+
+void Game::drawGrid(void)
 {
 	// Drawing parameters for easy modification
 	const int xGap = 8;
@@ -207,8 +244,8 @@ inline void Game::draw(void)
 	//const int blackIndex = 0;
 	const int whiteIndex = 1;
 
-	const int boardWidth = (cellWidth * 3 + xGap * 2);
-	const int boardHeight = (cellHeight * 3 + yGap * 2);
+	const int boardWidth = (cellWidth * CellGrid::Width) + (xGap * 2);
+	const int boardHeight = (cellHeight * CellGrid::Height) + (yGap * 2);
 
 	const int xOffset = (Pokitto::Display::getWidth() - boardWidth) / 2;
 	const int yOffset = (Pokitto::Display::getHeight() - boardHeight) / 2;
@@ -230,9 +267,9 @@ inline void Game::draw(void)
 
 
 	// Draw grid
-	for(int y = 0; y < 3; ++y)
+	for(std::size_t y = 0; y < CellGrid::Height; ++y)
 	{
-		for(int x = 0; x < 3; ++x)
+		for(std::size_t x = 0; x < CellGrid::Width; ++x)
 		{
 			const int cellX = xOffset + ((cellWidth + xGap) * x);
 			const int cellY = yOffset + ((cellHeight + yGap) * y);
@@ -241,27 +278,27 @@ inline void Game::draw(void)
 			switch(grid.getItem(x, y))
 			{
 				case Cell::Nought:
-					{
-						const int halfCellWidth = cellWidth / 2;
-						const int halfCellHeight = cellHeight / 2;
-						const int cellCentreX = cellX + halfCellWidth;
-						const int cellCentreY = cellY + halfCellHeight;
-						const int radius = std::min(halfCellWidth, halfCellHeight) - 1;
+				{
+					const int halfCellWidth = cellWidth / 2;
+					const int halfCellHeight = cellHeight / 2;
+					const int cellCentreX = cellX + halfCellWidth;
+					const int cellCentreY = cellY + halfCellHeight;
+					const int radius = std::min(halfCellWidth, halfCellHeight) - 1;
 
-						Pokitto::Display::drawCircle(cellCentreX, cellCentreY, radius);
-						break;
-					}
+					Pokitto::Display::drawCircle(cellCentreX, cellCentreY, radius);
+					break;
+				}
 				case Cell::Cross:
-					{
-						const int left = cellX + 1;
-						const int top = cellY + 1;
-						const int right = cellX + cellWidth - 1;
-						const int bottom = cellY + cellHeight - 1;
+				{
+					const int left = cellX + 1;
+					const int top = cellY + 1;
+					const int right = cellX + cellWidth - 1;
+					const int bottom = cellY + cellHeight - 1;
 
-						Pokitto::Display::drawLine(left, top, right, bottom);
-						Pokitto::Display::drawLine(right, top, left, bottom);
-						break;
-					}
+					Pokitto::Display::drawLine(left, top, right, bottom);
+					Pokitto::Display::drawLine(right, top, left, bottom);
+					break;
+				}
 				default:
 					break;
 			}
@@ -273,113 +310,49 @@ inline void Game::draw(void)
 			}
 		}
 	}
+}
 
+void Game::drawStatus(void)
+{
 	Pokitto::Display::setCursor(16, 8);
 	switch(this->status)
 	{
 		case Status::Unfinished:
-			{
-				switch(this->currentTurn)
-				{
-					case Cell::Nought:
-					{
-						Pokitto::Display::print("Player: Noughts");
-						break;
-					}
-					case Cell::Cross:
-					{
-						Pokitto::Display::print("Player: Crosses");
-						break;
-					}
-					case Cell::None:
-					{
-						Pokitto::Display::print("Error!?");
-						break;
-					}
-				}
-				break;
-			}
-		case Status::NoughtsWins:
-			{
-				Pokitto::Display::print("Noughts Wins!");
-				break;
-			}
-		case Status::CrossesWins:
-			{
-				Pokitto::Display::print("Crosses Wins!");
-				break;
-			}
-		case Status::Draw:
-			{
-				Pokitto::Display::print("Draw!");
-				break;
-			}
-	}
-}
-
-// Old version
-/*inline void Game::draw(void)
-{
-	// Drawing parameters for easy modification
-	const int xOffset = 16;
-	const int yOffset = 16;
-	const int xGap = 8;
-	const int yGap = 8;
-	const int cellWidth = 32;
-	const int cellHeight = 32;
-
-	const int boxColourIndex = 3;
-	const int symbolColourIndex = 0;
-	const int selectorColourIndex = 1;
-
-	// Draw grid
-	for(int y = 0; y < 3; ++y)
-	{
-		for(int x = 0; x < 3; ++x)
 		{
-			const int cellX = xOffset + ((cellWidth + xGap) * x);
-			const int cellY = yOffset + ((cellHeight + yGap) * y);
-
-			// Draw box
-			Pokitto::Display::setColor(boxColourIndex);
-			Pokitto::Display::fillRect(cellX, cellY, cellWidth, cellHeight);
-
-			// Draw symbol
-			Pokitto::Display::setColor(symbolColourIndex);
-			switch(grid.getItem(x, y))
+			switch(this->currentTurn)
 			{
 				case Cell::Nought:
-					{
-						const int halfCellWidth = cellWidth / 2;
-						const int halfCellHeight = cellHeight / 2;
-						const int cellCentreX = cellX + halfCellWidth;
-						const int cellCentreY = cellY + halfCellHeight;
-						const int radius = std::min(halfCellWidth, halfCellHeight) - 1;
-
-						Pokitto::Display::drawCircle(cellCentreX, cellCentreY, radius);
-						break;
-					}
-				case Cell::Cross:
-					{
-						const int left = cellX + 1;
-						const int top = cellY + 1;
-						const int right = cellX + cellWidth - 1;
-						const int bottom = cellY + cellHeight - 1;
-
-						Pokitto::Display::drawLine(left, top, right, bottom);
-						Pokitto::Display::drawLine(right, top, left, bottom);
-						break;
-					}
-				default:
+				{
+					Pokitto::Display::print("Player: Noughts");
 					break;
+				}
+				case Cell::Cross:
+				{
+					Pokitto::Display::print("Player: Crosses");
+					break;
+				}
+				case Cell::None:
+				{
+					Pokitto::Display::print("Error!?");
+					break;
+				}
 			}
-
-			// Draw selector
-			if(x == this->selector.x && y == this->selector.y)
-			{
-				Pokitto::Display::setColor(selectorColourIndex);
-				Pokitto::Display::drawRect(cellX, cellY, cellWidth, cellHeight);
-			}
+			break;
+		}
+		case Status::NoughtsWins:
+		{
+			Pokitto::Display::print("Noughts Wins!");
+			break;
+		}
+		case Status::CrossesWins:
+		{
+			Pokitto::Display::print("Crosses Wins!");
+			break;
+		}
+		case Status::Draw:
+		{
+			Pokitto::Display::print("Draw!");
+			break;
 		}
 	}
-}*/
+}

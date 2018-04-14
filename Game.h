@@ -27,19 +27,19 @@
 class Game
 {
 public:
+	enum class Cell : unsigned char
+	{
+		None,
+		Nought,
+		Cross,
+	};
+
 	enum class Status : unsigned char
 	{
 		Unfinished,
 		NoughtsWins,
 		CrossesWins,
 		Draw,
-	};
-
-	enum class Cell : unsigned char
-	{
-		None,
-		Nought,
-		Cross,
 	};
 
 public:

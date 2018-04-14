@@ -20,6 +20,7 @@
 #include <Pokitto.h>
 
 #include <algorithm>
+#include <utility>
 
 #include "Grid.h"
 #include "Point.h"
@@ -59,6 +60,7 @@ private:
 	void update(void);
 	void draw(void);
 
+	std::pair<bool, Cell> getWinner(void) const;
 	bool hasAnyEmptyCells(void) const;
 	Status calculateStatus(void) const;
 };
@@ -75,6 +77,52 @@ inline void Game::run(void)
 			this->draw();
 		}
 	}
+}
+
+inline std::pair<bool, Game::Cell> Game::getWinner(void) const
+{
+	static const PointType winningSets[][3] =
+	{
+		// Vertical
+		{ PointType(0, 0), PointType(0, 1), PointType(0, 2) },
+		{ PointType(1, 0), PointType(1, 1), PointType(1, 2) },
+		{ PointType(2, 0), PointType(2, 1), PointType(2, 2) },
+
+		// Horizontal
+		{ PointType(0, 0), PointType(1, 0), PointType(2, 0) },
+		{ PointType(0, 1), PointType(1, 1), PointType(2, 1) },
+		{ PointType(0, 2), PointType(1, 2), PointType(2, 2) },
+
+		// Diagonal
+		{ PointType(0, 0), PointType(1, 1), PointType(2, 2) },
+		{ PointType(2, 0), PointType(1, 1), PointType(0, 2) },
+	};
+
+	for(auto const & line : winningSets)
+	{
+		const PointType start = line[0];
+		const Cell type = this->grid.getItem(start.x, start.y);
+
+		if(type == Cell::None)
+			continue;
+
+		bool success = true;
+		for(int i = 0; i < 3; ++i)
+		{
+			if(this->grid.getItem(line[i].x, line[i].y) != type)
+			{
+				success = false;
+				break;
+			}
+		}
+
+		if(success)
+		{
+			return std::make_pair(true, type);
+		}
+	}
+
+	return std::make_pair(false, Cell::None);
 }
 
 inline bool Game::hasAnyEmptyCells(void) const
@@ -95,52 +143,20 @@ inline bool Game::hasAnyEmptyCells(void) const
 
 inline Game::Status Game::calculateStatus(void) const
 {
-	PointType const winningSets[][3] =
+	const auto winner = getWinner();
+	const bool success = winner.first;
+
+	if(success)
 	{
-		// Vertical
-		{ PointType(0, 0), PointType(0, 1), PointType(0, 2) },
-		{ PointType(1, 0), PointType(1, 1), PointType(1, 2) },
-		{ PointType(2, 0), PointType(2, 1), PointType(2, 2) },
-
-		// Horizontal
-		{ PointType(0, 0), PointType(1, 0), PointType(2, 0) },
-		{ PointType(0, 1), PointType(1, 1), PointType(2, 1) },
-		{ PointType(0, 2), PointType(1, 2), PointType(2, 2) },
-
-		// Diagonal
-		{ PointType(0, 0), PointType(1, 1), PointType(2, 2) },
-		{ PointType(2, 0), PointType(1, 1), PointType(0, 2) },
-	};
-
-	for(auto const & line : winningSets)
-	{
-		PointType start = line[0];
-		Cell type = this->grid.getItem(start.x, start.y);
-
-		if(type == Cell::None)
-			continue;
-
-		bool success = true;
-		for(int i = 0; i < 3; ++i)
+		const Cell type = winner.second;
+		switch(type)
 		{
-			if(this->grid.getItem(line[i].x, line[i].y) != type)
-			{
-				success = false;
-				break;
-			}
-		}
-
-		if(success)
-		{
-			switch(type)
-			{
-				case Cell::Nought:
-					return Status::NoughtsWins;
-				case Cell::Cross:
-					return Status::CrossesWins;
-				default:
-					return Status::Unfinished;
-			}
+			case Cell::Nought:
+				return Status::NoughtsWins;
+			case Cell::Cross:
+				return Status::CrossesWins;
+			default:
+				return Status::Unfinished;
 		}
 	}
 

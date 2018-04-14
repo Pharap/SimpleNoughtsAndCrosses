@@ -268,27 +268,27 @@ void Game::draw(void)
 			switch(grid.getItem(x, y))
 			{
 				case Cell::Nought:
-					{
-						const int halfCellWidth = cellWidth / 2;
-						const int halfCellHeight = cellHeight / 2;
-						const int cellCentreX = cellX + halfCellWidth;
-						const int cellCentreY = cellY + halfCellHeight;
-						const int radius = std::min(halfCellWidth, halfCellHeight) - 1;
+				{
+					const int halfCellWidth = cellWidth / 2;
+					const int halfCellHeight = cellHeight / 2;
+					const int cellCentreX = cellX + halfCellWidth;
+					const int cellCentreY = cellY + halfCellHeight;
+					const int radius = std::min(halfCellWidth, halfCellHeight) - 1;
 
-						Pokitto::Display::drawCircle(cellCentreX, cellCentreY, radius);
-						break;
-					}
+					Pokitto::Display::drawCircle(cellCentreX, cellCentreY, radius);
+					break;
+				}
 				case Cell::Cross:
-					{
-						const int left = cellX + 1;
-						const int top = cellY + 1;
-						const int right = cellX + cellWidth - 1;
-						const int bottom = cellY + cellHeight - 1;
+				{
+					const int left = cellX + 1;
+					const int top = cellY + 1;
+					const int right = cellX + cellWidth - 1;
+					const int bottom = cellY + cellHeight - 1;
 
-						Pokitto::Display::drawLine(left, top, right, bottom);
-						Pokitto::Display::drawLine(right, top, left, bottom);
-						break;
-					}
+					Pokitto::Display::drawLine(left, top, right, bottom);
+					Pokitto::Display::drawLine(right, top, left, bottom);
+					break;
+				}
 				default:
 					break;
 			}
@@ -305,41 +305,41 @@ void Game::draw(void)
 	switch(this->status)
 	{
 		case Status::Unfinished:
+		{
+			switch(this->currentTurn)
 			{
-				switch(this->currentTurn)
+				case Cell::Nought:
 				{
-					case Cell::Nought:
-					{
-						Pokitto::Display::print("Player: Noughts");
-						break;
-					}
-					case Cell::Cross:
-					{
-						Pokitto::Display::print("Player: Crosses");
-						break;
-					}
-					case Cell::None:
-					{
-						Pokitto::Display::print("Error!?");
-						break;
-					}
+					Pokitto::Display::print("Player: Noughts");
+					break;
 				}
-				break;
+				case Cell::Cross:
+				{
+					Pokitto::Display::print("Player: Crosses");
+					break;
+				}
+				case Cell::None:
+				{
+					Pokitto::Display::print("Error!?");
+					break;
+				}
 			}
+			break;
+		}
 		case Status::NoughtsWins:
-			{
-				Pokitto::Display::print("Noughts Wins!");
-				break;
-			}
+		{
+			Pokitto::Display::print("Noughts Wins!");
+			break;
+		}
 		case Status::CrossesWins:
-			{
-				Pokitto::Display::print("Crosses Wins!");
-				break;
-			}
+		{
+			Pokitto::Display::print("Crosses Wins!");
+			break;
+		}
 		case Status::Draw:
-			{
-				Pokitto::Display::print("Draw!");
-				break;
-			}
+		{
+			Pokitto::Display::print("Draw!");
+			break;
+		}
 	}
 }

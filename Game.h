@@ -59,6 +59,7 @@ private:
 	void update(void);
 	void draw(void);
 
+	bool hasAnyEmptyCells(void) const;
 	Status calculateStatus(void) const;
 };
 
@@ -74,6 +75,22 @@ inline void Game::run(void)
 			this->draw();
 		}
 	}
+}
+
+inline bool Game::hasAnyEmptyCells(void) const
+{
+	for(int y = 0; y < 3; ++y)
+	{
+		for(int x = 0; x < 3; ++x)
+		{
+			if(this->grid.getItem(x, y) == Cell::None)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 inline Game::Status Game::calculateStatus(void) const
@@ -127,20 +144,14 @@ inline Game::Status Game::calculateStatus(void) const
 		}
 	}
 
-	bool hasEmptySpace = false;
-	for(int y = 0; y < 3 && !hasEmptySpace; ++y)
+	if(this->hasAnyEmptyCells())
 	{
-		for(int x = 0; x < 3; ++x)
-		{
-			if(this->grid.getItem(x, y) == Cell::None)
-			{
-				hasEmptySpace = true;
-				break;
-			}
-		}
+		return Status::Unfinished;
 	}
-
-	return hasEmptySpace ? Status::Unfinished : Status::Draw;
+	else
+	{
+		return Status::Draw;
+	}
 }
 
 inline void Game::update(void)

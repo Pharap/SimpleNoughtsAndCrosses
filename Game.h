@@ -86,25 +86,25 @@ void Game::update(void)
 {
 	if(Pokitto::Buttons::held(BTN_LEFT, 1))
 	{
-		if(this->selector.x > 0)
+		if(this->selector.x > CellGrid::FirstX)
 			--this->selector.x;
 	}
 
 	if(Pokitto::Buttons::held(BTN_RIGHT, 1))
 	{
-		if(this->selector.x < 2)
+		if(this->selector.x < CellGrid::LastX)
 			++this->selector.x;
 	}
 
 	if(Pokitto::Buttons::held(BTN_UP, 1))
 	{
-		if(this->selector.y > 0)
+		if(this->selector.y > CellGrid::FirstY)
 			--this->selector.y;
 	}
 
 	if(Pokitto::Buttons::held(BTN_DOWN, 1))
 	{
-		if(this->selector.y < 2)
+		if(this->selector.y < CellGrid::LastY)
 			++this->selector.y;
 	}
 
@@ -189,9 +189,9 @@ std::pair<bool, Game::Cell> Game::getWinner(void) const
 
 bool Game::hasAnyEmptyCells(void) const
 {
-	for(int y = 0; y < 3; ++y)
+	for(int y = 0; y < CellGrid::Height; ++y)
 	{
-		for(int x = 0; x < 3; ++x)
+		for(int x = 0; x < CellGrid::Width; ++x)
 		{
 			if(this->grid.getItem(x, y) == Cell::None)
 			{
@@ -243,8 +243,8 @@ void Game::drawGrid(void)
 	//const int blackIndex = 0;
 	const int whiteIndex = 1;
 
-	const int boardWidth = (cellWidth * 3 + xGap * 2);
-	const int boardHeight = (cellHeight * 3 + yGap * 2);
+	const int boardWidth = (cellWidth * CellGrid::Width) + (xGap * 2);
+	const int boardHeight = (cellHeight * CellGrid::Height) + (yGap * 2);
 
 	const int xOffset = (Pokitto::Display::getWidth() - boardWidth) / 2;
 	const int yOffset = (Pokitto::Display::getHeight() - boardHeight) / 2;
@@ -266,9 +266,9 @@ void Game::drawGrid(void)
 
 
 	// Draw grid
-	for(int y = 0; y < 3; ++y)
+	for(int y = 0; y < CellGrid::Height; ++y)
 	{
-		for(int x = 0; x < 3; ++x)
+		for(int x = 0; x < CellGrid::Width; ++x)
 		{
 			const int cellX = xOffset + ((cellWidth + xGap) * x);
 			const int cellY = yOffset + ((cellHeight + yGap) * y);

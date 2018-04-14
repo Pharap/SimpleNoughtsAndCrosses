@@ -44,7 +44,7 @@ public:
 
 public:
 	using CellGrid = Grid<Cell, 3, 3>;
-	using PointType = Point<int>;
+	using PointType = Point<unsigned int>;
 
 private:
 	CellGrid grid;

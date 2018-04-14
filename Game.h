@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <utility>
+#include <cstddef>
 
 #include "Grid.h"
 #include "Point.h"
@@ -169,7 +170,7 @@ std::pair<bool, Game::Cell> Game::getWinner(void) const
 			continue;
 
 		bool success = true;
-		for(int i = 0; i < 3; ++i)
+		for(std::size_t i = 0; i < 3; ++i)
 		{
 			if(this->grid.getItem(line[i].x, line[i].y) != type)
 			{
@@ -189,9 +190,9 @@ std::pair<bool, Game::Cell> Game::getWinner(void) const
 
 bool Game::hasAnyEmptyCells(void) const
 {
-	for(int y = 0; y < CellGrid::Height; ++y)
+	for(std::size_t y = 0; y < CellGrid::Height; ++y)
 	{
-		for(int x = 0; x < CellGrid::Width; ++x)
+		for(std::size_t x = 0; x < CellGrid::Width; ++x)
 		{
 			if(this->grid.getItem(x, y) == Cell::None)
 			{
@@ -266,9 +267,9 @@ void Game::drawGrid(void)
 
 
 	// Draw grid
-	for(int y = 0; y < CellGrid::Height; ++y)
+	for(std::size_t y = 0; y < CellGrid::Height; ++y)
 	{
-		for(int x = 0; x < CellGrid::Width; ++x)
+		for(std::size_t x = 0; x < CellGrid::Width; ++x)
 		{
 			const int cellX = xOffset + ((cellWidth + xGap) * x);
 			const int cellY = yOffset + ((cellHeight + yGap) * y);

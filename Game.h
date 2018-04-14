@@ -82,6 +82,65 @@ void Game::run(void)
 	}
 }
 
+void Game::update(void)
+{
+	if(Pokitto::Buttons::held(BTN_LEFT, 1))
+	{
+		if(this->selector.x > 0)
+			--this->selector.x;
+	}
+
+	if(Pokitto::Buttons::held(BTN_RIGHT, 1))
+	{
+		if(this->selector.x < 2)
+			++this->selector.x;
+	}
+
+	if(Pokitto::Buttons::held(BTN_UP, 1))
+	{
+		if(this->selector.y > 0)
+			--this->selector.y;
+	}
+
+	if(Pokitto::Buttons::held(BTN_DOWN, 1))
+	{
+		if(this->selector.y < 2)
+			++this->selector.y;
+	}
+
+	if(Pokitto::Buttons::held(BTN_A, 1))
+	{
+		if(this->grid.getItem(this->selector.x, this->selector.y) == Cell::None)
+		{
+			this->grid.getItem(this->selector.x, this->selector.y) = this->currentTurn;
+			switch(this->currentTurn)
+			{
+				case Cell::Nought:
+					this->currentTurn = Cell::Cross;
+					break;
+				case Cell::Cross:
+					this->currentTurn = Cell::Nought;
+					break;
+				default: break;
+			}
+
+			this->status = this->calculateStatus();
+		}
+	}
+
+	if(Pokitto::Buttons::held(BTN_B, 10) && this->status != Status::Unfinished)
+	{
+		this->grid.fill(Cell::None);
+		this->status = Status::Unfinished;
+	}
+}
+
+void Game::draw(void)
+{
+	drawGrid();
+	drawStatus();
+}
+
 std::pair<bool, Game::Cell> Game::getWinner(void) const
 {
 	static const PointType winningSets[][3] =
@@ -171,65 +230,6 @@ Game::Status Game::calculateStatus(void) const
 	{
 		return Status::Draw;
 	}
-}
-
-void Game::update(void)
-{
-	if(Pokitto::Buttons::held(BTN_LEFT, 1))
-	{
-		if(this->selector.x > 0)
-			--this->selector.x;
-	}
-
-	if(Pokitto::Buttons::held(BTN_RIGHT, 1))
-	{
-		if(this->selector.x < 2)
-			++this->selector.x;
-	}
-
-	if(Pokitto::Buttons::held(BTN_UP, 1))
-	{
-		if(this->selector.y > 0)
-			--this->selector.y;
-	}
-
-	if(Pokitto::Buttons::held(BTN_DOWN, 1))
-	{
-		if(this->selector.y < 2)
-			++this->selector.y;
-	}
-
-	if(Pokitto::Buttons::held(BTN_A, 1))
-	{
-		if(this->grid.getItem(this->selector.x, this->selector.y) == Cell::None)
-		{
-			this->grid.getItem(this->selector.x, this->selector.y) = this->currentTurn;
-			switch(this->currentTurn)
-			{
-				case Cell::Nought:
-					this->currentTurn = Cell::Cross;
-					break;
-				case Cell::Cross:
-					this->currentTurn = Cell::Nought;
-					break;
-				default: break;
-			}
-
-			this->status = this->calculateStatus();
-		}
-	}
-
-	if(Pokitto::Buttons::held(BTN_B, 10) && this->status != Status::Unfinished)
-	{
-		this->grid.fill(Cell::None);
-		this->status = Status::Unfinished;
-	}
-}
-
-void Game::draw(void)
-{
-	drawGrid();
-	drawStatus();
 }
 
 void Game::drawGrid(void)

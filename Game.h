@@ -74,43 +74,32 @@ void Game::run(void)
 	Pokitto::Core::begin();
 
 	while (Pokitto::Core::isRunning())
-	{
 		if (Pokitto::Core::update())
 		{
 			this->update();
 			this->draw();
 		}
-	}
 }
 
 void Game::update(void)
 {
 	if(Pokitto::Buttons::held(BTN_LEFT, 1))
-	{
 		if(this->selector.x > CellGrid::FirstX)
 			--this->selector.x;
-	}
 
 	if(Pokitto::Buttons::held(BTN_RIGHT, 1))
-	{
 		if(this->selector.x < CellGrid::LastX)
 			++this->selector.x;
-	}
 
 	if(Pokitto::Buttons::held(BTN_UP, 1))
-	{
 		if(this->selector.y > CellGrid::FirstY)
 			--this->selector.y;
-	}
 
 	if(Pokitto::Buttons::held(BTN_DOWN, 1))
-	{
 		if(this->selector.y < CellGrid::LastY)
 			++this->selector.y;
-	}
 
 	if(Pokitto::Buttons::held(BTN_A, 1))
-	{
 		if(this->grid.getItem(this->selector.x, this->selector.y) == Cell::None)
 		{
 			this->grid.getItem(this->selector.x, this->selector.y) = this->currentTurn;
@@ -127,9 +116,8 @@ void Game::update(void)
 
 			this->status = this->calculateStatus();
 		}
-	}
 
-	if(Pokitto::Buttons::held(BTN_B, 10) && this->status != Status::Unfinished)
+	if(Pokitto::Buttons::held(BTN_B, 10) && (this->status != Status::Unfinished))
 	{
 		this->grid.fill(Cell::None);
 		this->status = Status::Unfinished;
@@ -171,18 +159,14 @@ std::pair<bool, Game::Cell> Game::getWinner(void) const
 
 		bool success = true;
 		for(std::size_t i = 0; i < 3; ++i)
-		{
 			if(this->grid.getItem(line[i].x, line[i].y) != type)
 			{
 				success = false;
 				break;
 			}
-		}
 
 		if(success)
-		{
 			return std::make_pair(true, type);
-		}
 	}
 
 	return std::make_pair(false, Cell::None);
@@ -191,15 +175,9 @@ std::pair<bool, Game::Cell> Game::getWinner(void) const
 bool Game::hasAnyEmptyCells(void) const
 {
 	for(std::size_t y = 0; y < CellGrid::Height; ++y)
-	{
 		for(std::size_t x = 0; x < CellGrid::Width; ++x)
-		{
 			if(this->grid.getItem(x, y) == Cell::None)
-			{
 				return true;
-			}
-		}
-	}
 
 	return false;
 }
@@ -223,14 +201,7 @@ Game::Status Game::calculateStatus(void) const
 		}
 	}
 
-	if(this->hasAnyEmptyCells())
-	{
-		return Status::Unfinished;
-	}
-	else
-	{
-		return Status::Draw;
-	}
+	return (this->hasAnyEmptyCells()) ? Status::Unfinished : Status::Draw;
 }
 
 void Game::drawGrid(void)
@@ -268,7 +239,6 @@ void Game::drawGrid(void)
 
 	// Draw grid
 	for(std::size_t y = 0; y < CellGrid::Height; ++y)
-	{
 		for(std::size_t x = 0; x < CellGrid::Width; ++x)
 		{
 			const int cellX = xOffset + ((cellWidth + xGap) * x);
@@ -304,12 +274,9 @@ void Game::drawGrid(void)
 			}
 
 			// Draw selector
-			if(x == this->selector.x && y == this->selector.y)
-			{
+			if((x == this->selector.x) && (y == this->selector.y))
 				Pokitto::Display::drawRect(cellX, cellY, cellWidth, cellHeight);
-			}
 		}
-	}
 }
 
 void Game::drawStatus(void)

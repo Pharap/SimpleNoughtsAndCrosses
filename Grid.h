@@ -29,6 +29,8 @@ public:
 	constexpr static const SizeType Width = WidthValue;
 	constexpr static const SizeType Height = HeightValue;
 	constexpr static const SizeType Count = Width * Height;
+	
+	static_assert((((Width * Height) / Height) == Width), "Width * Height overflows std::size_t");
 
 	constexpr static const SizeType FirstX = 0;
 	constexpr static const SizeType FirstY = 0;

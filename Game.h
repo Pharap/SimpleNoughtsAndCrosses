@@ -207,16 +207,16 @@ Game::Status Game::calculateStatus(void) const
 void Game::drawGrid(void)
 {
 	// Drawing parameters for easy modification
-	const int xGap = 8;
-	const int yGap = 8;
-	const int cellWidth = 32;
-	const int cellHeight = 32;
+	constexpr int xGap = 8;
+	constexpr int yGap = 8;
+	constexpr int cellWidth = 32;
+	constexpr int cellHeight = 32;
 
 	//const int blackIndex = 0;
-	const int whiteIndex = 1;
+	constexpr int whiteIndex = 1;
 
-	const int boardWidth = (cellWidth * CellGrid::Width) + (xGap * 2);
-	const int boardHeight = (cellHeight * CellGrid::Height) + (yGap * 2);
+	constexpr int boardWidth = (cellWidth * CellGrid::Width) + (xGap * 2);
+	constexpr int boardHeight = (cellHeight * CellGrid::Height) + (yGap * 2);
 
 	const int xOffset = (Pokitto::Display::getWidth() - boardWidth) / 2;
 	const int yOffset = (Pokitto::Display::getHeight() - boardHeight) / 2;
@@ -249,8 +249,8 @@ void Game::drawGrid(void)
 			{
 				case Cell::Nought:
 				{
-					const int halfCellWidth = cellWidth / 2;
-					const int halfCellHeight = cellHeight / 2;
+					constexpr int halfCellWidth = cellWidth / 2;
+					constexpr int halfCellHeight = cellHeight / 2;
 					const int cellCentreX = cellX + halfCellWidth;
 					const int cellCentreY = cellY + halfCellHeight;
 					const int radius = std::min(halfCellWidth, halfCellHeight) - 1;
@@ -262,8 +262,8 @@ void Game::drawGrid(void)
 				{
 					const int left = cellX + 1;
 					const int top = cellY + 1;
-					const int right = cellX + cellWidth - 1;
-					const int bottom = cellY + cellHeight - 1;
+					const int right = cellX + (cellWidth - 1);
+					const int bottom = cellY + (cellHeight - 1);
 
 					Pokitto::Display::drawLine(left, top, right, bottom);
 					Pokitto::Display::drawLine(right, top, left, bottom);

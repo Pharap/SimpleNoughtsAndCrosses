@@ -16,39 +16,55 @@
    limitations under the License.
 */
 
-#include <cstdint>
+#include <cstddef>
 
-template< typename Type, std::uint8_t WidthValue, std::uint8_t HeightValue >
+template< typename Type, std::size_t Width, std::size_t Height >
+class Grid;
+
+template< typename Type, std::size_t Height >
+class Grid<Type, 0, Height>
+{
+};
+
+template< typename Type, std::size_t Width >
+class Grid<Type, Width, 0>
+{
+};
+
+template< typename Type, std::size_t WidthValue, std::size_t HeightValue >
 class Grid
 {
 public:
-	using ValueType = Type;
+	using ValueType = Type;	
+	using SizeType = std::size_t;
 
 public:
-	constexpr static const std::uint8_t Width = WidthValue;
-	constexpr static const std::uint8_t Height = HeightValue;
-	constexpr static const std::uint16_t Count = Width * Height;
+	constexpr static const SizeType Width = WidthValue;
+	constexpr static const SizeType Height = HeightValue;
+	constexpr static const SizeType Count = Width * Height;
+	
+	static_assert((((Width * Height) / Height) == Width), "Width * Height overflows std::size_t");
 
-	constexpr static const std::uint8_t FirstX = 0;
-	constexpr static const std::uint8_t FirstY = 0;
-	constexpr static const std::uint8_t LastX = Width - 1;
-	constexpr static const std::uint8_t LastY = Height - 1;
+	constexpr static const SizeType FirstX = 0;
+	constexpr static const SizeType FirstY = 0;
+	constexpr static const SizeType LastX = Width - 1;
+	constexpr static const SizeType LastY = Height - 1;
 
 private:
 	ValueType items[Count];
 
-	inline std::uint8_t flattenIndex(const std::uint8_t & x, const std::uint8_t & y) const
+	inline SizeType flattenIndex(SizeType x, SizeType y) const
 	{
 		return (Width * y) + x;
 	}
 
 public:
-	constexpr std::uint16_t getCount(void) const;
-	constexpr std::uint8_t getWidth(void) const;
-	constexpr std::uint8_t getHeight(void) const;
+	constexpr SizeType getCount(void) const;
+	constexpr SizeType getWidth(void) const;
+	constexpr SizeType getHeight(void) const;
 
-	ValueType & getItem(const std::uint8_t & x, const std::uint8_t & y);
-	const ValueType & getItem(const std::uint8_t & x, const std::uint8_t & y) const;
+	ValueType & getItem(SizeType x, SizeType y);
+	const ValueType & getItem(SizeType x, SizeType y) const;
 
 	void fill(const ValueType & value); // O(n)
 	void clear(void); // O(n)
@@ -73,13 +89,13 @@ constexpr std::uint8_t Grid<Type, Width, Height>::getHeight(void) const
 }
 
 template< typename Type, std::uint8_t Width, std::uint8_t Height >
-typename Grid<Type, Width, Height>::ValueType & Grid<Type, Width, Height>::getItem(const std::uint8_t & x, const std::uint8_t & y)
+typename Grid<Type, Width, Height>::ValueType & Grid<Type, Width, Height>::getItem(SizeType x, SizeType y)
 {
 	return this->items[flattenIndex(x, y)];
 }
 
 template< typename Type, std::uint8_t Width, std::uint8_t Height >
-const typename Grid<Type, Width, Height>::ValueType & Grid<Type, Width, Height>::getItem(const std::uint8_t & x, const std::uint8_t & y) const
+const typename Grid<Type, Width, Height>::ValueType & Grid<Type, Width, Height>::getItem(SizeType x, SizeType y) const
 {
 	return this->items[flattenIndex(x, y)];
 }
@@ -87,13 +103,13 @@ const typename Grid<Type, Width, Height>::ValueType & Grid<Type, Width, Height>:
 template< typename Type, std::uint8_t Width, std::uint8_t Height >
 void Grid<Type, Width, Height>::fill(const ValueType & value)
 {
-	for(std::uint16_t i = 0; i < Count; ++i)
+	for(SizeType i = 0; i < Count; ++i)
 		items[i] = value;
 }
 
 template< typename Type, std::uint8_t Width, std::uint8_t Height >
 void Grid<Type, Width, Height>::clear(void) // O(n)
 {
-	for (std::uint16_t i = 0; i < Count; ++i)
+	for (SizeType = 0; i < Count; ++i)
 		(&this->items[i])->~ValueType();
 }

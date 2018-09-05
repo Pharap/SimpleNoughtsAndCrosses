@@ -18,6 +18,9 @@
 
 #include <cstddef>
 
+template< typename Type, std::size_t Width, std::size_t Height >
+class Grid;
+
 template< typename Type, std::size_t WidthValue, std::size_t HeightValue >
 class Grid
 {

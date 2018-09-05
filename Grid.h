@@ -21,6 +21,16 @@
 template< typename Type, std::size_t Width, std::size_t Height >
 class Grid;
 
+template< typename Type, std::size_t Height >
+class Grid<Type, 0, Height>
+{
+};
+
+template< typename Type, std::size_t Width >
+class Grid<Type, Width, 0>
+{
+};
+
 template< typename Type, std::size_t WidthValue, std::size_t HeightValue >
 class Grid
 {

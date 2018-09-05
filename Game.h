@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <utility>
 #include <cstddef>
+#include <cstdint>
 
 #include "Grid.h"
 #include "Point.h"
@@ -29,14 +30,14 @@
 class Game
 {
 public:
-	enum class Cell : unsigned char
+	enum class Cell : std::uint8_t
 	{
 		None,
 		Nought,
 		Cross,
 	};
 
-	enum class Status : unsigned char
+	enum class Status : std::uint8_t
 	{
 		Unfinished,
 		NoughtsWins,
@@ -46,7 +47,7 @@ public:
 
 public:
 	using CellGrid = Grid<Cell, 3, 3>;
-	using PointType = Point<unsigned int>;
+	using PointType = Point<std::size_t>;
 
 private:
 	CellGrid grid;
@@ -207,25 +208,25 @@ Game::Status Game::calculateStatus(void) const
 void Game::drawGrid(void)
 {
 	// Drawing parameters for easy modification
-	constexpr int xGap = 8;
-	constexpr int yGap = 8;
-	constexpr int cellWidth = 32;
-	constexpr int cellHeight = 32;
+	constexpr std::int16_t xGap = 8;
+	constexpr std::int16_t yGap = 8;
+	constexpr std::int16_t cellWidth = 32;
+	constexpr std::int16_t cellHeight = 32;
 
 	//const int blackIndex = 0;
-	constexpr int whiteIndex = 1;
+	constexpr std::uint8_t whiteIndex = 1;
 
-	constexpr int boardWidth = (cellWidth * CellGrid::Width) + (xGap * 2);
-	constexpr int boardHeight = (cellHeight * CellGrid::Height) + (yGap * 2);
+	constexpr std::int16_t boardWidth = (cellWidth * CellGrid::Width) + (xGap * 2);
+	constexpr std::int16_t boardHeight = (cellHeight * CellGrid::Height) + (yGap * 2);
 
-	const int xOffset = (Pokitto::Display::getWidth() - boardWidth) / 2;
-	const int yOffset = (Pokitto::Display::getHeight() - boardHeight) / 2;
+	const std::int16_t xOffset = (Pokitto::Display::getWidth() - boardWidth) / 2;
+	const std::int16_t yOffset = (Pokitto::Display::getHeight() - boardHeight) / 2;
 
-	const int leftLineX = xOffset + (cellWidth * 1) + (xGap * 0) + (xGap / 2);
-	const int rightLineX = xOffset + (cellWidth * 2) + (xGap * 1) + (xGap / 2);
+	const std::int16_t leftLineX = xOffset + (cellWidth * 1) + (xGap * 0) + (xGap / 2);
+	const std::int16_t rightLineX = xOffset + (cellWidth * 2) + (xGap * 1) + (xGap / 2);
 
-	const int topLineY = yOffset + (cellHeight * 1) + (yGap * 0) + (yGap / 2);
-	const int bottomLineY = yOffset + (cellHeight * 2) + (yGap * 1) + (yGap / 2);
+	const std::int16_t topLineY = yOffset + (cellHeight * 1) + (yGap * 0) + (yGap / 2);
+	const std::int16_t bottomLineY = yOffset + (cellHeight * 2) + (yGap * 1) + (yGap / 2);
 
 	// Draw lines
 	Pokitto::Display::setColor(whiteIndex);
@@ -241,29 +242,29 @@ void Game::drawGrid(void)
 	for(std::size_t y = 0; y < CellGrid::Height; ++y)
 		for(std::size_t x = 0; x < CellGrid::Width; ++x)
 		{
-			const int cellX = xOffset + ((cellWidth + xGap) * x);
-			const int cellY = yOffset + ((cellHeight + yGap) * y);
+			const std::int16_t cellX = xOffset + ((cellWidth + xGap) * x);
+			const std::int16_t cellY = yOffset + ((cellHeight + yGap) * y);
 
 			// Draw symbol
 			switch(grid.getItem(x, y))
 			{
 				case Cell::Nought:
 				{
-					constexpr int halfCellWidth = cellWidth / 2;
-					constexpr int halfCellHeight = cellHeight / 2;
-					const int cellCentreX = cellX + halfCellWidth;
-					const int cellCentreY = cellY + halfCellHeight;
-					const int radius = std::min(halfCellWidth, halfCellHeight) - 1;
+					constexpr std::int16_t halfCellWidth = cellWidth / 2;
+					constexpr std::int16_t halfCellHeight = cellHeight / 2;
+					const std::int16_t cellCentreX = cellX + halfCellWidth;
+					const std::int16_t cellCentreY = cellY + halfCellHeight;
+					const std::int16_t radius = std::min(halfCellWidth, halfCellHeight) - 1;
 
 					Pokitto::Display::drawCircle(cellCentreX, cellCentreY, radius);
 					break;
 				}
 				case Cell::Cross:
 				{
-					const int left = cellX + 1;
-					const int top = cellY + 1;
-					const int right = cellX + (cellWidth - 1);
-					const int bottom = cellY + (cellHeight - 1);
+					const std::int16_t left = cellX + 1;
+					const std::int16_t top = cellY + 1;
+					const std::int16_t right = cellX + (cellWidth - 1);
+					const std::int16_t bottom = cellY + (cellHeight - 1);
 
 					Pokitto::Display::drawLine(left, top, right, bottom);
 					Pokitto::Display::drawLine(right, top, left, bottom);

@@ -84,23 +84,23 @@ void Game::run(void)
 
 void Game::update(void)
 {
-	if(Pokitto::Buttons::held(BTN_LEFT, 1))
+	if(Pokitto::Buttons::pressed(BTN_LEFT))
 		if(this->selector.x > CellGrid::FirstX)
 			--this->selector.x;
 
-	if(Pokitto::Buttons::held(BTN_RIGHT, 1))
+	if(Pokitto::Buttons::pressed(BTN_RIGHT))
 		if(this->selector.x < CellGrid::LastX)
 			++this->selector.x;
 
-	if(Pokitto::Buttons::held(BTN_UP, 1))
+	if(Pokitto::Buttons::pressed(BTN_UP))
 		if(this->selector.y > CellGrid::FirstY)
 			--this->selector.y;
 
-	if(Pokitto::Buttons::held(BTN_DOWN, 1))
+	if(Pokitto::Buttons::pressed(BTN_DOWN))
 		if(this->selector.y < CellGrid::LastY)
 			++this->selector.y;
 
-	if(Pokitto::Buttons::held(BTN_A, 1))
+	if(Pokitto::Buttons::pressed(BTN_A))
 		if(this->grid.getItem(this->selector.x, this->selector.y) == Cell::None)
 		{
 			this->grid.getItem(this->selector.x, this->selector.y) = this->currentTurn;

@@ -59,9 +59,20 @@ private:
 	}
 
 public:
-	constexpr SizeType getCount(void) const;
-	constexpr SizeType getWidth(void) const;
-	constexpr SizeType getHeight(void) const;
+	constexpr SizeType getCount(void) const
+	{
+		return Count;
+	}
+
+	constexpr SizeType getWidth(void) const
+	{
+		return Width;
+	}
+
+	constexpr SizeType getHeight(void) const
+	{
+		return Height;
+	}
 
 	ValueType & getItem(SizeType x, SizeType y);
 	const ValueType & getItem(SizeType x, SizeType y) const;
@@ -70,46 +81,28 @@ public:
 	void clear(void); // O(n)
 };
 
-template< typename Type, std::uint8_t Width, std::uint8_t Height >
-constexpr std::uint16_t Grid<Type, Width, Height>::getCount(void) const
-{
-	return Grid<Type, Width, Height>::Count;
-}
-
-template< typename Type, std::uint8_t Width, std::uint8_t Height >
-constexpr std::uint8_t Grid<Type, Width, Height>::getWidth(void) const
-{
-	return Grid<Type, Width, Height>::Width;
-}
-
-template< typename Type, std::uint8_t Width, std::uint8_t Height >
-constexpr std::uint8_t Grid<Type, Width, Height>::getHeight(void) const
-{
-	return Grid<Type, Width, Height>::Height;
-}
-
-template< typename Type, std::uint8_t Width, std::uint8_t Height >
+template< typename Type, std::size_t Width, std::size_t Height >
 typename Grid<Type, Width, Height>::ValueType & Grid<Type, Width, Height>::getItem(SizeType x, SizeType y)
 {
 	return this->items[flattenIndex(x, y)];
 }
 
-template< typename Type, std::uint8_t Width, std::uint8_t Height >
+template< typename Type, std::size_t Width, std::size_t Height >
 const typename Grid<Type, Width, Height>::ValueType & Grid<Type, Width, Height>::getItem(SizeType x, SizeType y) const
 {
 	return this->items[flattenIndex(x, y)];
 }
 
-template< typename Type, std::uint8_t Width, std::uint8_t Height >
+template< typename Type, std::size_t Width, std::size_t Height >
 void Grid<Type, Width, Height>::fill(const ValueType & value)
 {
 	for(SizeType i = 0; i < Count; ++i)
 		items[i] = value;
 }
 
-template< typename Type, std::uint8_t Width, std::uint8_t Height >
+template< typename Type, std::size_t Width, std::size_t Height >
 void Grid<Type, Width, Height>::clear(void) // O(n)
 {
-	for (SizeType = 0; i < Count; ++i)
+	for (SizeType i = 0; i < Count; ++i)
 		(&this->items[i])->~ValueType();
 }

@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <utility>
 #include <cstddef>
+#include <cstdint>
 
 #include "Grid.h"
 #include "Point.h"
@@ -29,14 +30,14 @@
 class Game
 {
 public:
-	enum class Cell : unsigned char
+	enum class Cell : std::uint8_t
 	{
 		None,
 		Nought,
 		Cross,
 	};
 
-	enum class Status : unsigned char
+	enum class Status : std::uint8_t
 	{
 		Unfinished,
 		NoughtsWins,
@@ -46,7 +47,7 @@ public:
 
 public:
 	using CellGrid = Grid<Cell, 3, 3>;
-	using PointType = Point<unsigned int>;
+	using PointType = Point<std::size_t>;
 
 private:
 	CellGrid grid;
@@ -74,43 +75,32 @@ void Game::run(void)
 	Pokitto::Core::begin();
 
 	while (Pokitto::Core::isRunning())
-	{
 		if (Pokitto::Core::update())
 		{
 			this->update();
 			this->draw();
 		}
-	}
 }
 
 void Game::update(void)
 {
-	if(Pokitto::Buttons::held(BTN_LEFT, 1))
-	{
+	if(Pokitto::Buttons::pressed(BTN_LEFT))
 		if(this->selector.x > CellGrid::FirstX)
 			--this->selector.x;
-	}
 
-	if(Pokitto::Buttons::held(BTN_RIGHT, 1))
-	{
+	if(Pokitto::Buttons::pressed(BTN_RIGHT))
 		if(this->selector.x < CellGrid::LastX)
 			++this->selector.x;
-	}
 
-	if(Pokitto::Buttons::held(BTN_UP, 1))
-	{
+	if(Pokitto::Buttons::pressed(BTN_UP))
 		if(this->selector.y > CellGrid::FirstY)
 			--this->selector.y;
-	}
 
-	if(Pokitto::Buttons::held(BTN_DOWN, 1))
-	{
+	if(Pokitto::Buttons::pressed(BTN_DOWN))
 		if(this->selector.y < CellGrid::LastY)
 			++this->selector.y;
-	}
 
-	if(Pokitto::Buttons::held(BTN_A, 1))
-	{
+	if(Pokitto::Buttons::pressed(BTN_A))
 		if(this->grid.getItem(this->selector.x, this->selector.y) == Cell::None)
 		{
 			this->grid.getItem(this->selector.x, this->selector.y) = this->currentTurn;
@@ -127,9 +117,8 @@ void Game::update(void)
 
 			this->status = this->calculateStatus();
 		}
-	}
 
-	if(Pokitto::Buttons::held(BTN_B, 10) && this->status != Status::Unfinished)
+	if(Pokitto::Buttons::held(BTN_B, 10) && (this->status != Status::Unfinished))
 	{
 		this->grid.fill(Cell::None);
 		this->status = Status::Unfinished;
@@ -171,18 +160,14 @@ std::pair<bool, Game::Cell> Game::getWinner(void) const
 
 		bool success = true;
 		for(std::size_t i = 0; i < 3; ++i)
-		{
 			if(this->grid.getItem(line[i].x, line[i].y) != type)
 			{
 				success = false;
 				break;
 			}
-		}
 
 		if(success)
-		{
 			return std::make_pair(true, type);
-		}
 	}
 
 	return std::make_pair(false, Cell::None);
@@ -191,15 +176,9 @@ std::pair<bool, Game::Cell> Game::getWinner(void) const
 bool Game::hasAnyEmptyCells(void) const
 {
 	for(std::size_t y = 0; y < CellGrid::Height; ++y)
-	{
 		for(std::size_t x = 0; x < CellGrid::Width; ++x)
-		{
 			if(this->grid.getItem(x, y) == Cell::None)
-			{
 				return true;
-			}
-		}
-	}
 
 	return false;
 }
@@ -223,38 +202,31 @@ Game::Status Game::calculateStatus(void) const
 		}
 	}
 
-	if(this->hasAnyEmptyCells())
-	{
-		return Status::Unfinished;
-	}
-	else
-	{
-		return Status::Draw;
-	}
+	return (this->hasAnyEmptyCells()) ? Status::Unfinished : Status::Draw;
 }
 
 void Game::drawGrid(void)
 {
 	// Drawing parameters for easy modification
-	const int xGap = 8;
-	const int yGap = 8;
-	const int cellWidth = 32;
-	const int cellHeight = 32;
+	constexpr std::int16_t xGap = 8;
+	constexpr std::int16_t yGap = 8;
+	constexpr std::int16_t cellWidth = 32;
+	constexpr std::int16_t cellHeight = 32;
 
 	//const int blackIndex = 0;
-	const int whiteIndex = 1;
+	constexpr std::uint8_t whiteIndex = 1;
 
-	const int boardWidth = (cellWidth * CellGrid::Width) + (xGap * 2);
-	const int boardHeight = (cellHeight * CellGrid::Height) + (yGap * 2);
+	constexpr std::int16_t boardWidth = (cellWidth * CellGrid::Width) + (xGap * 2);
+	constexpr std::int16_t boardHeight = (cellHeight * CellGrid::Height) + (yGap * 2);
 
-	const int xOffset = (Pokitto::Display::getWidth() - boardWidth) / 2;
-	const int yOffset = (Pokitto::Display::getHeight() - boardHeight) / 2;
+	const std::int16_t xOffset = (Pokitto::Display::getWidth() - boardWidth) / 2;
+	const std::int16_t yOffset = (Pokitto::Display::getHeight() - boardHeight) / 2;
 
-	const int leftLineX = xOffset + (cellWidth * 1) + (xGap * 0) + (xGap / 2);
-	const int rightLineX = xOffset + (cellWidth * 2) + (xGap * 1) + (xGap / 2);
+	const std::int16_t leftLineX = xOffset + (cellWidth * 1) + (xGap * 0) + (xGap / 2);
+	const std::int16_t rightLineX = xOffset + (cellWidth * 2) + (xGap * 1) + (xGap / 2);
 
-	const int topLineY = yOffset + (cellHeight * 1) + (yGap * 0) + (yGap / 2);
-	const int bottomLineY = yOffset + (cellHeight * 2) + (yGap * 1) + (yGap / 2);
+	const std::int16_t topLineY = yOffset + (cellHeight * 1) + (yGap * 0) + (yGap / 2);
+	const std::int16_t bottomLineY = yOffset + (cellHeight * 2) + (yGap * 1) + (yGap / 2);
 
 	// Draw lines
 	Pokitto::Display::setColor(whiteIndex);
@@ -268,32 +240,31 @@ void Game::drawGrid(void)
 
 	// Draw grid
 	for(std::size_t y = 0; y < CellGrid::Height; ++y)
-	{
 		for(std::size_t x = 0; x < CellGrid::Width; ++x)
 		{
-			const int cellX = xOffset + ((cellWidth + xGap) * x);
-			const int cellY = yOffset + ((cellHeight + yGap) * y);
+			const std::int16_t cellX = xOffset + ((cellWidth + xGap) * x);
+			const std::int16_t cellY = yOffset + ((cellHeight + yGap) * y);
 
 			// Draw symbol
 			switch(grid.getItem(x, y))
 			{
 				case Cell::Nought:
 				{
-					const int halfCellWidth = cellWidth / 2;
-					const int halfCellHeight = cellHeight / 2;
-					const int cellCentreX = cellX + halfCellWidth;
-					const int cellCentreY = cellY + halfCellHeight;
-					const int radius = std::min(halfCellWidth, halfCellHeight) - 1;
+					constexpr std::int16_t halfCellWidth = cellWidth / 2;
+					constexpr std::int16_t halfCellHeight = cellHeight / 2;
+					const std::int16_t cellCentreX = cellX + halfCellWidth;
+					const std::int16_t cellCentreY = cellY + halfCellHeight;
+					const std::int16_t radius = std::min(halfCellWidth, halfCellHeight) - 1;
 
 					Pokitto::Display::drawCircle(cellCentreX, cellCentreY, radius);
 					break;
 				}
 				case Cell::Cross:
 				{
-					const int left = cellX + 1;
-					const int top = cellY + 1;
-					const int right = cellX + cellWidth - 1;
-					const int bottom = cellY + cellHeight - 1;
+					const std::int16_t left = cellX + 1;
+					const std::int16_t top = cellY + 1;
+					const std::int16_t right = cellX + (cellWidth - 1);
+					const std::int16_t bottom = cellY + (cellHeight - 1);
 
 					Pokitto::Display::drawLine(left, top, right, bottom);
 					Pokitto::Display::drawLine(right, top, left, bottom);
@@ -304,12 +275,9 @@ void Game::drawGrid(void)
 			}
 
 			// Draw selector
-			if(x == this->selector.x && y == this->selector.y)
-			{
+			if((x == this->selector.x) && (y == this->selector.y))
 				Pokitto::Display::drawRect(cellX, cellY, cellWidth, cellHeight);
-			}
 		}
-	}
 }
 
 void Game::drawStatus(void)

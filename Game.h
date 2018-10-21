@@ -27,6 +27,8 @@
 #include "Grid.h"
 #include "Point.h"
 
+#include "Controllers.h"
+
 class Game
 {
 public:
@@ -54,6 +56,10 @@ private:
 	PointType selector;
 	Cell currentTurn = Cell::Nought;
 	Status status = Status::Unfinished;
+
+	ButtonController buttonController;
+	CommonJoyHatController joyhatController;
+	Controller * controller = &buttonController;
 
 public:
 	void run(void);
@@ -84,23 +90,25 @@ void Game::run(void)
 
 void Game::update(void)
 {
-	if(Pokitto::Buttons::pressed(BTN_LEFT))
+	this->controller->update();
+
+	if(this->controller->justPressed(Buttons::Left))
 		if(this->selector.x > CellGrid::FirstX)
 			--this->selector.x;
 
-	if(Pokitto::Buttons::pressed(BTN_RIGHT))
+	if(this->controller->justPressed(Buttons::Right))
 		if(this->selector.x < CellGrid::LastX)
 			++this->selector.x;
 
-	if(Pokitto::Buttons::pressed(BTN_UP))
+	if(this->controller->justPressed(Buttons::Up))
 		if(this->selector.y > CellGrid::FirstY)
 			--this->selector.y;
 
-	if(Pokitto::Buttons::pressed(BTN_DOWN))
+	if(this->controller->justPressed(Buttons::Down))
 		if(this->selector.y < CellGrid::LastY)
 			++this->selector.y;
 
-	if(Pokitto::Buttons::pressed(BTN_A))
+	if(this->controller->justPressed(Buttons::A))
 		if(this->grid.getItem(this->selector.x, this->selector.y) == Cell::None)
 		{
 			this->grid.getItem(this->selector.x, this->selector.y) = this->currentTurn;
@@ -108,9 +116,11 @@ void Game::update(void)
 			{
 				case Cell::Nought:
 					this->currentTurn = Cell::Cross;
+					this->controller = &joyhatController;
 					break;
 				case Cell::Cross:
 					this->currentTurn = Cell::Nought;
+					this->controller = &buttonController;
 					break;
 				default: break;
 			}
@@ -118,10 +128,13 @@ void Game::update(void)
 			this->status = this->calculateStatus();
 		}
 
-	if(Pokitto::Buttons::held(BTN_B, 10) && (this->status != Status::Unfinished))
+	if(this->status != Status::Unfinished)
 	{
-		this->grid.fill(Cell::None);
-		this->status = Status::Unfinished;
+		if(this->controller->justPressed(Buttons::B))
+		{
+			this->grid.fill(Cell::None);
+			this->status = Status::Unfinished;
+		}
 	}
 }
 
